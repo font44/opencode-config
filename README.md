@@ -2,7 +2,7 @@
 
 Shared [OpenCode](https://opencode.ai) configuration managed as a Nix flake.
 
-Disables built-in `build`/`plan` agents, replaces them with a single `builder` primary agent with a minimal system prompt.
+Installs a bwrap-sandboxed OpenCode binary (Linux) with bundled config. Disables built-in `build`/`plan` agents, replaces them with a single `builder` primary agent with a minimal system prompt.
 
 ## Install
 
@@ -10,12 +10,7 @@ Disables built-in `build`/`plan` agents, replaces them with a single `builder` p
 nix profile install github:<user>/opencode-config
 ```
 
-Set env vars once (stable across upgrades):
-
-```bash
-export OPENCODE_CONFIG="$HOME/.nix-profile/share/opencode-config/opencode.jsonc"
-export OPENCODE_CONFIG_DIR="$HOME/.nix-profile/share/opencode-config"
-```
+That's it — `opencode` is on your PATH with config pre-wired. No env vars needed.
 
 ## Update
 
