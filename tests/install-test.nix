@@ -34,6 +34,8 @@ pkgs.testers.nixosTest {
 
       machine.succeed("test -s ${cfg}/skills/fetch-website-in-markdown/SKILL.md")
 
+      machine.succeed("test -s ${cfg}/plugins/slim-tools.ts")
+
       machine.succeed("test -x ${package}/bin/opencode")
 
       machine.succeed("grep -q 'OPENCODE_CONFIG_DIR' ${package}/bin/opencode")
