@@ -1,4 +1,4 @@
-import type { Plugin } from "opencode/plugin";
+import type { PluginModule } from "opencode/plugin";
 
 const slimDescriptions: Record<string, string> = {
   bash: "Run a shell command. Use workdir param instead of cd. Timeout default 120s. Quote paths with spaces. Prefer dedicated tools for file ops (Read, Edit, Write, Grep, Glob).",
@@ -13,7 +13,7 @@ const slimDescriptions: Record<string, string> = {
     "Write/overwrite a file. Read existing files first. Prefer Edit for existing files.",
   grep: 'Search file contents via regex. Returns paths + line numbers sorted by mtime. Use include param to filter by glob.',
   glob: 'Find files by glob pattern (e.g. "**/*.ts"). Returns paths sorted by mtime.',
-  ls: "List files and directories. Prefer Glob/Grep when you know what to search for.",
+  list: "List files and directories. Prefer Glob/Grep when you know what to search for.",
   webfetch:
     "Fetch a URL and return content as markdown, text, or html.",
   websearch:
@@ -29,30 +29,31 @@ const slimDescriptions: Record<string, string> = {
     "Suggest switching to plan agent for complex tasks or when user mentions planning.",
   plan_exit:
     "Exit plan agent after plan is finalized and questions resolved.",
+  skill: "Load a specialized skill for domain-specific instructions and workflows.",
+  compress: "Compress conversation context into dense summaries. Use for closed sections of conversation.",
 };
 
-const plugin: Plugin = {
-  name: "slim-tools",
-  hooks: {
-    "tool.definition": ({ tool }) => {
-      const slim = slimDescriptions[tool.name];
+export default {
+  id: "slim-tools",
+  server: async () => ({
+    "tool.definition": async (
+      input: { toolID: string },
+      output: { description: string; parameters: any },
+    ) => {
+      const slim = slimDescriptions[input.toolID];
       if (slim) {
-        return { ...tool, description: slim };
+        output.description = slim;
       }
-      return tool;
     },
-    "experimental.chat.system.transform": ({ messages }) =>
-      messages.map((msg) => {
-        if (typeof msg.content !== "string") return msg;
-        let content = msg.content;
-        content = content.replace(/<env>[\s\S]*?<\/env>\s*/g, "");
-        content = content.replace(
-          /<directories>[\s\S]*?<\/directories>\s*/g,
-          "",
-        );
-        return { ...msg, content };
-      }),
-  },
-};
-
-export default plugin;
+    "experimental.chat.system.transform": async (
+      _input: any,
+      output: { system: string[] },
+    ) => {
+      for (let i = 0; i < output.system.length; i++) {
+        output.system[i] = output.system[i]
+          .replace(/<env>[\s\S]*?<\/env>\s*/g, "")
+          .replace(/<directories>[\s\S]*?<\/directories>\s*/g, "");
+      }
+    },
+  }),
+} satisfies PluginModule;
